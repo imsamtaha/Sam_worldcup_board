@@ -142,7 +142,10 @@ section{position:relative;padding:55px 16px;max-width:1180px;margin:0 auto}
 .msg{max-width:88%;padding:8px 11px;border-radius:12px;font-size:12px;line-height:1.45}
 .msg.bot{background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.2);align-self:flex-start;border-bottom-left-radius:3px}
 .msg.user{background:rgba(255,107,0,.25);align-self:flex-end;border-bottom-right-radius:3px}
-#chatInput-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.chat-chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border-top:1px solid var(--line)}
+.chip{background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.35);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--amber);cursor:pointer;transition:background .2s,transform .15s;white-space:nowrap}
+.chip:hover{background:rgba(255,107,0,.25);transform:scale(1.04)}
+#chatInput-row{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line)}
 #chatInput{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--chalk);font-size:12px;font-family:'DM Sans',sans-serif;outline:none}
 #chatInput:focus{border-color:rgba(255,107,0,.5)}
 #chatSend{background:var(--flood);border:none;border-radius:8px;padding:7px 12px;color:#000;font-weight:700;cursor:pointer;font-size:12px;transition:background .2s}
@@ -221,6 +224,13 @@ footer .ar{font-family:'Cairo',sans-serif;font-size:13px;color:var(--amber);marg
   <div id="chatHead"><span>ASK SAM ⚡ WC26</span><button id="chatClose" onclick="toggleChat()">✕</button></div>
   <div id="chatMsgs">
     <div class="msg bot">مرحبا! أنا ASK SAM — اسألني عن أي شي بكأس العالم 2026 🏆 Ask me anything about World Cup 26!</div>
+  </div>
+  <div class="chat-chips">
+    <span class="chip" onclick="quickAsk('نتائج كل الفرق 🏆')">نتائج الفرق 🏆</span>
+    <span class="chip" onclick="quickAsk('مين أحسن هداف؟ الحذاء الذهبي 👟')">الهدافين 👟</span>
+    <span class="chip" onclick="quickAsk('متى موعد النهائي؟ ⏰')">المواعيد ⏰</span>
+    <span class="chip" onclick="quickAsk('مين أحسن فريق هلق؟ 🔥')">أحسن الفرق 🔥</span>
+    <span class="chip" onclick="quickAsk('بيروت والتوقيت 🇱🇧')">بيروت 🇱🇧</span>
   </div>
   <div id="chatInput-row">
     <input id="chatInput" placeholder="Ask about matches, scores, teams..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -432,30 +442,42 @@ function addMsg(text,role){
   document.getElementById("chatMsgs").appendChild(d);
   document.getElementById("chatMsgs").scrollTop=9999;
 }
-async function sendChat(){
+function smartBot(q){
+  const t=q.toLowerCase();
+  // Results
+  if(t.includes("germany")||t.includes("المانيا")||t.includes("ألمانيا"))return"🇩🇪 Germany 7–1 Curaçao — أقوى نتيجة في البطولة لحتى هلق! هداف: Kai Havertz سجّل 2 أهداف ⚽";
+  if(t.includes("messi")||t.includes("ميسي")||t.includes("argentina")||t.includes("الارجنتين")||t.includes("أرجنتين"))return"🐐 ميسي سجّل هاتريك في مباراة الأرجنتين 3–0 الجزائر! هلق هو صاحب أكتر هداف في تاريخ كأس العالم بـ 16 هدف 🏆";
+  if(t.includes("mbappe")||t.includes("مبابي")||t.includes("france")||t.includes("فرنسا"))return"🇫🇷 مبابي سجّل هدفين وفرنسا فازت 3–1 على السنيغال. هلق عنده 2 أهداف وهو مرشح قوي للحذاء الذهبي 👟";
+  if(t.includes("haaland")||t.includes("هالاند")||t.includes("norway")||t.includes("النرويج"))return"🇳🇴 هالاند سجّل هدفين في أول مباراة له بكأس العالم! النرويج 4–1 العراق. وحش! 🔥";
+  if(t.includes("usa")||t.includes("أمريك")||t.includes("امريك")||t.includes("united states"))return"🇺🇸 USA فازت 4–1 على باراغواي! Folarin Balogun سجّل هدفين. أمريكا من أقوى الفرق هلق ⭐";
+  if(t.includes("england")||t.includes("انجلترا")||t.includes("إنجلترا"))return"🏴󠁧󠁢󠁥󠁮󠁧󠁿 إنجلترا فازت 4–2 على كرواتيا! هاري كاين سجّل هدفين. بداية قوية 💪";
+  if(t.includes("brazil")||t.includes("برازيل")||t.includes("البرازيل"))return"🇧🇷 البرازيل تعادلت 1–1 مع المغرب. Vinícius Júnior سجّل هدف الدراما. المباراة الجاية vs هايتي ⚽";
+  if(t.includes("morocco")||t.includes("المغرب"))return"🇲🇦 المغرب تعادل 1–1 مع البرازيل. Ismael Saibari سجّل أول هدف! أداء ممتاز 🔥";
+  if(t.includes("sweden")||t.includes("السويد"))return"🇸🇪 السويد سحقت تونس 5–1! Yasin Ayari سجّل هدفين من خارج المنطقة. Viktor Gyökeres أيضاً سجّل 🌟";
+  if(t.includes("scotland")||t.includes("اسكتلند")||t.includes("أسكتلندا"))return"🏴󠁧󠁢󠁸󠁣󠁴󠁿 اسكتلندا فازت 1–0 على هايتي. McGinn سجّل في الدقيقة 28. أول فوز لهم بكأس العالم منذ 1998! 🎉";
+  if(t.includes("australia")||t.includes("أستراليا")||t.includes("استراليا"))return"🇦🇺 أستراليا فاجأت الجميع وفازت 2–0 على تركيا! Connor Metcalfe سجّل هدف خرافي 🎯";
+  // Scorers
+  if(t.includes("scorer")||t.includes("goal")||t.includes("هداف")||t.includes("أهداف")||t.includes("golden boot")||t.includes("الحذاء"))return"👟 الهدافون حتى الآن:\n🥇 Messi 🇦🇷 — 3 أهداف\n🥈 Mbappé 🇫🇷 — 2\n🥈 Haaland 🇳🇴 — 2\n🥈 Havertz 🇩🇪 — 2\n🥈 Kane 🏴󠁧󠁢󠁥󠁮󠁧󠁿 — 2\n🥈 Balogun 🇺🇸 — 2";
+  // Schedule/Time
+  if(t.includes("final")||t.includes("النهائي")||t.includes("الفينال"))return"🏆 النهائي: الأحد 19 يوليو 2026\nالساعة 10:00 مساءً بتوقيت بيروت\nMetLife Stadium, New York 🗽";
+  if(t.includes("when")||t.includes("متى")||t.includes("موعد")||t.includes("وقت"))return"⏰ جميع المواعيد بالصفحة بتوقيت بيروت (GMT+3). البطولة تنتهي 19 يوليو بنهائي نيويورك 🗽";
+  if(t.includes("host")||t.includes("where")||t.includes("وين")||t.includes("أين")||t.includes("مضيف"))return"🌎 كأس العالم 2026 في 3 دول:\n🇺🇸 الولايات المتحدة (11 ملعب)\n🇲🇽 المكسيك (3 ملاعب)\n🇨🇦 كندا (2 ملعب)\nالمجموع: 16 ملعب، 104 مباراة";
+  if(t.includes("team")||t.includes("best")||t.includes("أحسن")||t.includes("أفضل فريق"))return"🔥 أقوى فرق هلق بالنتائج:\n1⃣ Germany 7-1 (فارق أهداف +6)\n2⃣ USA 4-1 (+3)\n3⃣ Norway 4-1 (+3)\n4⃣ England 4-2 (+2)\n5⃣ Argentina 3-0 (+3) — مع ميسي! 🐐";
+  if(t.includes("group")||t.includes("مجموعة")||t.includes("ترتيب"))return"📊 جدول المجموعات موجود بالصفحة! اسكرول لفوق وشوف القسم 'Group Standings' ⬆️";
+  if(t.includes("beirut")||t.includes("بيروت")||t.includes("lebanon")||t.includes("لبنان"))return"🇱🇧 هاي الصفحة من Beirut! كل المباريات محوّلة لتوقيت بيروت GMT+3 = Eastern Time + 7 ساعات. يلا نتفرج! 🔥";
+  // Default
+  const defaults=["⚽ اسألني عن أي فريق، مباراة، أو هداف بكأس العالم 2026! مثلاً: 'شو نتيجة ألمانيا؟' أو 'مين أحسن هداف؟'","🏆 عندي كل نتائج MD1! اسألني عن أي فريق أو لاعب 🔥","⚽ Try asking: 'Who is top scorer?' or 'When is the final?' or 'How did USA do?'"];
+  return defaults[Math.floor(Math.random()*defaults.length)];
+}
+
+function quickAsk(q){
+  document.getElementById("chatInput").value=q;
+  sendChat();
+}
+function sendChat(){
   const inp=document.getElementById("chatInput"),txt=inp.value.trim();
   if(!txt)return;inp.value="";addMsg(txt,"user");
-  chatHistory.push({role:"user",content:txt});
-  const thinking=document.createElement("div");thinking.className="msg bot";thinking.textContent="...";
-  document.getElementById("chatMsgs").appendChild(thinking);
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-6",max_tokens:400,
-        system:`You are ASK SAM, an expert World Cup 2026 assistant. Be concise, fun, bilingual (AR/EN). 
-Key facts: Tournament runs Jun 11–Jul 19, 2026. USA/Mexico/Canada hosts. 48 teams.
-Known results: Mexico 2-0 South Africa, South Korea 2-1 Czechia, Canada 1-1 Bosnia, USA 4-1 Paraguay, Qatar 1-1 Switzerland, Brazil 1-1 Morocco, Scotland 1-0 Haiti, Australia 2-0 Türkiye, Germany 7-1 Curaçao, Netherlands 2-2 Japan, Ivory Coast 1-0 Ecuador, Sweden 5-1 Tunisia, Spain 0-0 Cape Verde, Belgium 1-1 Egypt, Saudi Arabia 1-1 Uruguay, Iran 2-2 New Zealand, France 3-1 Senegal, Norway 4-1 Iraq, Argentina 3-0 Algeria (Messi hat-trick!), England 4-2 Croatia.
-Top scorers: Messi 3, Mbappé/Haaland/Havertz/Ayari/Balogun/Kane/Just all on 2.
-All times shown are Beirut GMT+3. Answer in the same language the user writes.`,
-        messages:chatHistory.slice(-8)
-      })
-    });
-    const data=await res.json();
-    const reply=data.content?.[0]?.text||"Sorry, couldn't get a response!";
-    thinking.remove();addMsg(reply,"bot");
-    chatHistory.push({role:"assistant",content:reply});
-  }catch(e){thinking.remove();addMsg("⚡ Connection error — try again!","bot");}
+  setTimeout(()=>addMsg(smartBot(txt),"bot"),420);
 }
 
 // ══ INIT ══
